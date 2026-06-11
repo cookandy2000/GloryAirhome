@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Display Website - Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", -apple-system, sans-serif; }
+        :root { 
+            --primary: #2563eb; 
+            --primary-hover: #1d4ed8; 
+            --bg: #f8fafc; 
+            --card-bg: #ffffff; 
+            --text: #1e293b; 
+            --text-secondary: #64748b; 
+            --border: #e2e8f0; 
+            --success: #22c55e; 
+            --danger: #ef4444; 
+            --radius: 12px; 
+        }
+        body { background: var(--bg); color: var(--text); }
+        nav { 
+            background: var(--text); 
+            color: white; 
+            padding: 14px 32px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            z-index: 99; 
+        }
+        .logo { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .lang-switch {
+            background: transparent;
+            color: #cbd5e1;
+            border: 1px solid #475569;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .lang-switch:hover {
+            color: white;
+            border-color: var(--primary);
+            background: rgba(37,99,235,0.15);
+        }
+        .nav-links { display: flex; align-items: center; gap: 6px; }
+        .nav-links a { 
+            color: #cbd5e1; 
+            padding: 8px 16px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            transition: 0.2s; 
+            font-size: 14px; 
+        }
+        .nav-links a:hover { color: white; background: rgba(255,255,255,0.1); }
+        .nav-links a.active { color: white; background: var(--primary); }
+        .btn-admin { 
+            background: transparent; 
+            color: #cbd5e1; 
+            border: 1px solid #475569; 
+            padding: 6px 14px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            margin-left: 12px; 
+            transition: 0.2s; 
+        }
+        .btn-admin:hover { 
+            color: white; 
+            border-color: var(--primary); 
+            background: rgba(37,99,235,0.15); 
+        }
+        .btn-admin.active { 
+            color: white; 
+            border-color: var(--primary); 
+            background: var(--primary); 
+        }
+        .banner { 
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%); 
+            color: white; 
+            text-align: center; 
+            padding: 100px 20px 80px; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .banner::before { 
+            content: ""; 
+            position: absolute; 
+            top: -50%; 
+            left: -50%; 
+            width: 200%; 
+            height: 200%; 
+            background: radial-gradient(circle at 30% 50%, rgba(37,99,235,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 50%, rgba(37,99,235,0.1) 0%, transparent 50%); 
+        }
+        .banner h1 { font-size: 40px; font-weight: 700; position: relative; margin-bottom: 12px; }
+        .banner p { font-size: 18px; color: #94a3b8; position: relative; }
+        .banner .product-count { 
+            display: inline-block; 
+            margin-top: 20px; 
+            padding: 8px 20px; 
+            background: rgba(37,99,235,0.2); 
+            border: 1px solid rgba(37,99,235,0.3); 
+            border-radius: 20px; 
+            font-size: 14px; 
+            color: #93c5fd; 
+            position: relative; 
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+        .section-title { text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 12px; }
+        .section-subtitle { text-align: center; color: var(--text-secondary); margin-bottom: 40px; font-size: 15px; }
+        .product-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+        .product-card { 
+            background: var(--card-bg); 
+            border-radius: var(--radius); 
+            overflow: hidden; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            position: relative; 
+        }
+        .product-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .product-img { 
+            height: 200px; 
+            background: #1a1a2e; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #94a3b8; 
+            font-size: 14px; 
+            overflow: hidden; 
+            position: relative; 
+        }
+        .product-img img { width: 100%; height: 100%; object-fit: cover; }
+        .product-img video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .product-img .video-play-badge { 
+            position: absolute; 
+            bottom: 8px; 
+            right: 8px; 
+            background: rgba(0,0,0,0.65); 
+            color: white; 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 12px; 
+            pointer-events: none; 
+            backdrop-filter: blur(2px); 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+        }
+        .product-img .placeholder-icon { font-size: 48px; opacity: 0.4; }
+        .product-info { padding: 16px 18px 18px; }
+        .product-name { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+        .product-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+        .product-actions { display: none; position: absolute; top: 10px; right: 10px; gap: 6px; }
+        .product-actions.show { display: flex; }
+        .product-actions button { 
+            width: 32px; 
+            height: 32px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: 0.2s; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15); 
+        }
+        .btn-edit { background: var(--primary); color: white; }
+        .btn-edit:hover { background: var(--primary-hover); }
+        .btn-delete { background: var(--danger); color: white; }
+        .btn-delete:hover { background: #dc2626; }
+        .product-empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .product-empty .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.3; }
+        .admin-panel { 
+            display: none; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: var(--radius); 
+            padding: 32px; 
+            margin-bottom: 40px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06); 
+        }
+        .admin-panel.show { display: block; }
+        .admin-panel h3 { font-size: 20px; margin-bottom: 8px; }
+        .admin-panel .form-hint { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; }
+        .admin-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .admin-form .full-width { grid-column: 1 / -1; }
+        .admin-form label { font-size: 14px; font-weight: 500; display: block; margin-bottom: 6px; }
+        .admin-form .input-group { display: flex; gap: 8px; align-items: stretch; }
+        .admin-form .input-group input[type="url"] { flex: 1; min-width: 0; }
+        .admin-form input, .admin-form textarea { 
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            font-size: 14px; 
+            outline: none; 
+            transition: 0.2s; 
+            background: var(--bg); 
+        }
+        .admin-form input:focus, .admin-form textarea:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1); 
+        }
+        .admin-form textarea { resize: vertical; min-height: 80px; }
+        .btn-file { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 5px; 
+            padding: 10px 16px; 
+            border: 1px dashed var(--border); 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            color: var(--text-secondary); 
+            background: var(--bg); 
+            transition: 0.2s; 
+            white-space: nowrap; 
+            flex-shrink: 0; 
+        }
+        .btn-file:hover { 
+            border-color: var(--primary); 
+            color: var(--primary); 
+            background: #eff6ff; 
+        }
+        .btn-file.has-file { 
+            border-color: var(--success); 
+            color: var(--success); 
+            background: #f0fdf4; 
+        }
+        .btn-file input[type="file"] { display: none; }
+        .btn-clear-file { 
+            display: none; 
+            padding: 10px 10px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            color: var(--danger); 
+            background: #fef2f2; 
+            transition: 0.2s; 
+            flex-shrink: 0; 
+        }
+        .btn-clear-file.show { display: inline-flex; align-items: center; }
+        .btn-clear-file:hover { background: #fee2e2; }
+        .form-actions { 
+            grid-column: 1 / -1; 
+            display: flex; 
+            gap: 12px; 
+            margin-top: 4px; 
+            flex-wrap: wrap; 
+        }
+        .btn-primary { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 10px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: 0.2s; 
+        }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { 
+            background: var(--bg); 
+            color: var(--text); 
+            border: 1px solid var(--border); 
+            padding: 10px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            transition: 0.2s; 
+        }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-cancel { display: none; }
+        .modal-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.5); 
+            backdrop-filter: blur(4px); 
+            z-index: 1000; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box { 
+            background: var(--card-bg); 
+            border-radius: var(--radius); 
+            padding: 32px; 
+            width: 380px; 
+            max-width: 90vw; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2); 
+        }
+        .modal-box h3 { font-size: 20px; margin-bottom: 8px; }
+        .modal-box .modal-desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 20px; }
+        .modal-box input { 
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            font-size: 15px; 
+            outline: none; 
+            margin-bottom: 16px; 
+        }
+        .modal-box input:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1); 
+        }
+        .modal-box .modal-actions { display: flex; gap: 10px; }
+        .modal-box .modal-error { color: var(--danger); font-size: 13px; margin-bottom: 12px; display: none; }
+        .toast { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 2000; 
+            padding: 14px 24px; 
+            border-radius: 10px; 
+            color: white; 
+            font-size: 14px; 
+            font-weight: 500; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
+            transform: translateX(120%); 
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); 
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        footer { 
+            background: var(--text); 
+            color: #94a3b8; 
+            text-align: center; 
+            padding: 24px; 
+            font-size: 14px; 
+        }
+        .contact-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+        .contact-info h3 { font-size: 22px; margin-bottom: 12px; }
+        .contact-info p { color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
+        .contact-info .info-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 12px; 
+            color: var(--text-secondary); 
+            font-size: 14px; 
+        }
+        .form-box { 
+            background: var(--card-bg); 
+            padding: 28px; 
+            border-radius: var(--radius); 
+            border: 1px solid var(--border); 
+        }
+        .form-box input, .form-box textarea { 
+            width: 100%; 
+            padding: 10px 14px; 
+            margin-bottom: 14px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            font-size: 14px; 
+            outline: none; 
+            background: var(--bg); 
+            transition: 0.2s; 
+        }
+        .form-box input:focus, .form-box textarea:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1); 
+        }
+        .form-box textarea { resize: vertical; min-height: 100px; }
+        .form-box button { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 12px 28px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: 0.2s; 
+            width: 100%; 
+        }
+        .form-box button:hover { background: var(--primary-hover); }
+        
+        /* 响应式样式 */
+        @media (max-width: 768px) { 
+            nav { 
+                padding: 12px 16px; 
+                flex-wrap: wrap; 
+                gap: 8px; 
+            } 
+            .nav-links a { 
+                padding: 6px 10px; 
+                font-size: 13px; 
+            } 
+            .banner { 
+                padding: 60px 16px 50px; 
+            } 
+            .banner h1 { font-size: 28px; } 
+            .admin-form { grid-template-columns: 1fr; } 
+            .admin-form .input-group { flex-wrap: wrap; } 
+            .form-actions { flex-direction: column; } 
+            .contact-wrapper { grid-template-columns: 1fr; } 
+            .product-list { grid-template-columns: 1fr; } 
+            .btn-admin { margin-left: 0; } 
+            .nav-controls {
+                margin-top: 8px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav>
+    <div class="logo" data-lang="logo">Product Display Website</div>
+    <div class="nav-controls">
+        <button class="lang-switch" id="langSwitch" onclick="toggleLanguage()">中文</button>
+        <div class="nav-links">
+            <a href="#home" data-lang="nav_home">Home</a>
+            <a href="#products" data-lang="nav_products">Products</a>
+            <a href="#contact" data-lang="nav_contact">Contact Us</a>
+            <button class="btn-admin" id="btnAdminToggle" onclick="toggleAdminLogin()" data-lang="btn_admin">🔐 Admin</button>
+        </div>
+    </div>
+</nav>
+
+<section id="home" class="banner">
+    <h1 data-lang="banner_title">High-quality Products · Professional Service</h1>
+    <p data-lang="banner_subtitle">Providing high-quality product solutions for customers</p>
+    <div class="product-count" data-lang="product_count">Total <span id="productCountBanner">0</span> products</div>
+</section>
+
+<section id="products" class="container">
+    <h2 class="section-title" data-lang="products_title">Product Display</h2>
+    <p class="section-subtitle" data-lang="products_subtitle">Browse all our products</p>
+    
+    <div class="admin-panel" id="adminPanel">
+        <h3 data-lang="admin_panel_title">Manage Products</h3>
+        <p class="form-hint" data-lang="admin_panel_hint">Add new products, or click the edit button on product cards to modify existing products</p>
+        <form class="admin-form" id="productForm">
+            <input type="hidden" id="editIndex" value="-1">
+            <div>
+                <label for="productName" data-lang="label_product_name">Product Name</label>
+                <input type="text" id="productName" placeholder="Enter product name" required data-lang-placeholder="placeholder_product_name">
+            </div>
+            <div>
+                <label data-lang="label_image">Image</label>
+                <div class="input-group">
+                    <input type="url" id="productImage" placeholder="Paste image link or upload local image" data-lang-placeholder="placeholder_image_url">
+                    <label class="btn-file" id="imageFileBtn" data-lang="btn_upload">📁 Upload<input type="file" id="imageFileInput" accept="image/*"></label>
+                    <button type="button" class="btn-clear-file" id="imageClearBtn" onclick="clearMediaFile('image')" data-lang="btn_clear">✖</button>
+                </div>
+            </div>
+            <div>
+                <label data-lang="label_video">Video (Optional)</label>
+                <div class="input-group">
+                    <input type="url" id="productVideo" placeholder="Paste video link or upload local video" data-lang-placeholder="placeholder_video_url">
+                    <label class="btn-file" id="videoFileBtn" data-lang="btn_upload">📁 Upload<input type="file" id="videoFileInput" accept="video/*"></label>
+                    <button type="button" class="btn-clear-file" id="videoClearBtn" onclick="clearMediaFile('video')" data-lang="btn_clear">✖</button>
+                </div>
+            </div>
+            <div class="full-width">
+                <label for="productDesc" data-lang="label_product_desc">Product Description</label>
+                <textarea id="productDesc" placeholder="Describe product features and advantages" required data-lang-placeholder="placeholder_product_desc"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary" id="submitBtn" data-lang="btn_add_product">+ Add Product</button>
+                <button type="button" class="btn-secondary btn-cancel" id="cancelBtn" onclick="cancelEdit()" data-lang="btn_cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="product-list" id="productList"></div>
+</section>
+
+<section id="contact" class="container">
+    <h2 class="section-title" data-lang="contact_title">Contact Us</h2>
+    <p class="section-subtitle" data-lang="contact_subtitle">If you have any questions or cooperation intentions, please contact us</p>
+    
+    <div class="contact-wrapper">
+        <div class="contact-info">
+            <h3 data-lang="contact_info_title">Contact Information</h3>
+            <p data-lang="contact_info_desc">We look forward to your call or message and will serve you as soon as possible.</p>
+            <div class="info-item" data-lang="contact_email">Email: contact@example.com</div>
+            <div class="info-item" data-lang="contact_phone">Phone: +86 400-888-8888</div>
+            <div class="info-item" data-lang="contact_address">Address: Technology Park, Chaoyang District, Beijing</div>
+        </div>
+        
+        <div class="form-box">
+            <form action="https://formsubmit.co/25527949@qq.com" method="POST">
+                <input type="hidden" name="_next" value="https://www.baidu.com">
+                <input type="text" name="name" placeholder="Your Name" required data-lang-placeholder="placeholder_your_name">
+                <input type="tel" name="phone" placeholder="Your Phone" required data-lang-placeholder="placeholder_your_phone">
+                <!-- 新增邮箱输入框 -->
+                <input type="email" name="email" placeholder="Your Email" data-lang-placeholder="placeholder_your_email">
+                <textarea name="message" rows="4" placeholder="Message Content" data-lang-placeholder="placeholder_message_content"></textarea>
+                <button type="submit" data-lang="btn_submit">Submit Information</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<div class="modal-overlay" id="adminModal">
+    <div class="modal-box">
+        <h3 data-lang="modal_title">Admin Verification</h3>
+        <p class="modal-desc" data-lang="modal_desc">Please enter the admin password to manage product information</p>
+        <div class="modal-error" id="loginError" data-lang="modal_error">Incorrect password, please try again</div>
+        <input type="password" id="adminPassword" placeholder="Enter admin password" data-lang-placeholder="placeholder_admin_password">
+        <div class="modal-actions">
+            <button class="btn-primary" onclick="verifyAdmin()" data-lang="btn_verify">Verify</button>
+            <button class="btn-secondary" onclick="closeAdminModal()" data-lang="btn_cancel">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<footer data-lang="footer">&copy; 2026 Product Display Website. All rights reserved.</footer>
+
+<script>
+// 语言配置
+const translations = {
+    en: {
+        logo: "Product Display Website",
+        nav_home: "Home",
+        nav_products: "Products",
+        nav_contact: "Contact Us",
+        btn_admin: "🔐 Admin",
+        banner_title: "High-quality Products · Professional Service",
+        banner_subtitle: "Providing high-quality product solutions for customers",
+        product_count: "Total <span id='productCountBanner'>0</span> products",
+        products_title: "Product Display",
+        products_subtitle: "Browse all our products",
+        admin_panel_title: "Manage Products",
+        admin_panel_hint: "Add new products, or click the edit button on product cards to modify existing products",
+        label_product_name: "Product Name",
+        label_image: "Image",
+        label_video: "Video (Optional)",
+        label_product_desc: "Product Description",
+        btn_upload: "📁 Upload",
+        btn_clear: "✖",
+        btn_add_product: "+ Add Product",
+        btn_cancel: "Cancel",
+        btn_save_edit: "💾 Save Changes",
+        contact_title: "Contact Us",
+        contact_subtitle: "If you have any questions or cooperation intentions, please contact us",
+        contact_info_title: "Contact Information",
+        contact_info_desc: "We look forward to your call or message and will serve you as soon as possible.",
+        contact_email: "Email: contact@example.com",
+        contact_phone: "Phone: +86 400-888-8888",
+        contact_address: "Address: Technology Park, Chaoyang District, Beijing",
+        btn_submit: "Submit Information",
+        modal_title: "Admin Verification",
+        modal_desc: "Please enter the admin password to manage product information",
+        modal_error: "Incorrect password, please try again",
+        btn_verify: "Verify",
+        footer: "&copy; 2026 Product Display Website. All rights reserved.",
+        placeholder_product_name: "Enter product name",
+        placeholder_image_url: "Paste image link or upload local image",
+        placeholder_video_url: "Paste video link or upload local video",
+        placeholder_product_desc: "Describe product features and advantages",
+        placeholder_your_name: "Your Name",
+        placeholder_your_phone: "Your Phone",
+        // 新增邮箱占位符英文
+        placeholder_your_email: "Your Email",
+        placeholder_message_content: "Message Content",
+        placeholder_admin_password: "Enter admin password",
+        product_empty: "<div class='empty-icon'>📦</div><p>No products yet, please ask admin to add product information</p>",
+        video_badge: "▶ Video",
+        toast_add_success: "Product added successfully",
+        toast_update_success: "Product updated successfully",
+        toast_delete_success: "Product deleted",
+        toast_login_success: "Entered admin mode",
+        toast_logout_success: "Exited admin mode",
+        toast_error_empty: "Please fill in complete information",
+        toast_error_image_size: "Image file is too large (over 2MB), please compress and try again or use external link",
+        toast_error_video_size: "Video file is too large (over 10MB), please compress and try again or use external link",
+        toast_error_file_read: "File reading failed, please try again",
+        toast_success_image_loaded: "Image loaded",
+        toast_success_video_loaded: "Video loaded",
+        confirm_delete: "Are you sure you want to delete \"{name}\"?"
+    },
+    zh: {
+        logo: "产品展示官网",
+        nav_home: "首页",
+        nav_products: "产品",
+        nav_contact: "联系我们",
+        btn_admin: "🔐 管理",
+        banner_title: "优质产品 · 专业服务",
+        banner_subtitle: "为客户提供高品质的产品解决方案",
+        product_count: "共 <span id='productCountBanner'>0</span> 款产品",
+        products_title: "产品展示",
+        products_subtitle: "浏览我们的全部产品",
+        admin_panel_title: "管理产品",
+        admin_panel_hint: "添加新产品，或点击产品卡片上的编辑按钮修改已有产品",
+        label_product_name: "产品名称",
+        label_image: "图片",
+        label_video: "视频（可选）",
+        label_product_desc: "产品描述",
+        btn_upload: "📁 上传",
+        btn_clear: "✖",
+        btn_add_product: "+ 添加产品",
+        btn_cancel: "取消",
+        btn_save_edit: "💾 保存修改",
+        contact_title: "联系我们",
+        contact_subtitle: "有任何问题或合作意向，欢迎与我们联系",
+        contact_info_title: "联系方式",
+        contact_info_desc: "我们期待您的来电或留言，将在第一时间为您服务。",
+        contact_email: "邮箱：contact@example.com",
+        contact_phone: "电话：400-888-8888",
+        contact_address: "地址：北京市朝阳区科技园区",
+        btn_submit: "提交信息",
+        modal_title: "管理员验证",
+        modal_desc: "请输入管理员密码以管理产品信息",
+        modal_error: "密码错误，请重试",
+        btn_verify: "验证",
+        footer: "&copy; 2026 产品展示官网 版权所有",
+        placeholder_product_name: "请输入产品名称",
+        placeholder_image_url: "粘贴图片链接 或 上传本地图片",
+        placeholder_video_url: "粘贴视频链接 或 上传本地视频",
+        placeholder_product_desc: "请描述产品的特点与优势",
+        placeholder_your_name: "您的姓名",
+        placeholder_your_phone: "您的电话",
+        // 新增邮箱占位符中文
+        placeholder_your_email: "您的邮箱",
+        placeholder_message_content: "留言内容",
+        placeholder_admin_password: "请输入管理员密码",
+        product_empty: "<div class='empty-icon'>📦</div><p>暂无产品，请管理员添加产品信息</p>",
+        video_badge: "▶ 视频",
+        toast_add_success: "产品添加成功",
+        toast_update_success: "产品已更新",
+        toast_delete_success: "产品已删除",
+        toast_login_success: "已进入管理模式",
+        toast_logout_success: "已退出管理模式",
+        toast_error_empty: "请填写完整信息",
+        toast_error_image_size: "图片文件过大（超过2MB），请压缩后重试或使用外链",
+        toast_error_video_size: "视频文件过大（超过10MB），请压缩后重试或使用外链",
+        toast_error_file_read: "文件读取失败，请重试",
+        toast_success_image_loaded: "图片已加载",
+        toast_success_video_loaded: "视频已加载",
+        confirm_delete: "确定要删除 \"{name}\" 吗？"
+    }
+};
+
+// 全局变量
+var ADMIN_PASSWORD = "admin123";
+var STORAGE_KEY = "codex_products";
+var products = [];
+var isAdmin = false;
+var currentLang = "en"; // 默认英文
+
+// 初始化
+function init() {
+    loadProducts();
+    renderProducts();
+    updateBannerCount();
+    setupNavScroll();
+    
+    // 表单提交事件
+    document.getElementById("productForm").addEventListener("submit", saveProduct);
+    
+    // 密码框回车事件
+    document.getElementById("adminPassword").addEventListener("keydown", function(e) { 
+        if (e.key === "Enter") verifyAdmin(); 
+    });
+    
+    // 文件上传事件
+    document.getElementById("imageFileInput").addEventListener("change", function(e) { 
+        handleFileSelect(e, "image"); 
+    });
+    document.getElementById("videoFileInput").addEventListener("change", function(e) { 
+        handleFileSelect(e, "video"); 
+    });
+    
+    // 初始化语言
+    updateLanguage();
+}
+
+// 切换语言
+function toggleLanguage() {
+    currentLang = currentLang === "en" ? "zh" : "en";
+    updateLanguage();
+    
+    // 更新语言切换按钮文本
+    const langBtn = document.getElementById("langSwitch");
+    langBtn.textContent = currentLang === "en" ? "中文" : "English";
+    
+    // 重新渲染产品（更新占位文本等）
+    renderProducts();
+}
+
+// 更新页面语言
+function updateLanguage() {
+    // 更新普通文本
+    document.querySelectorAll("[data-lang]").forEach(el => {
+        const key = el.getAttribute("data-lang");
+        if (translations[currentLang][key]) {
+            el.innerHTML = translations[currentLang][key];
+        }
+    });
+    
+    // 更新占位符
+    document.querySelectorAll("[data-lang-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-lang-placeholder");
+        if (translations[currentLang][key]) {
+            el.placeholder = translations[currentLang][key];
+        }
+    });
+    
+    // 更新文件上传按钮文本
+    updateFileBtnState("image", !!document.getElementById("productImage").value);
+    updateFileBtnState("video", !!document.getElementById("productVideo").value);
+}
+
+// 文件选择处理
+function handleFileSelect(event, type) {
+    var file = event.target.files[0]; 
+    if (!file) return;
+    
+    var maxSize = type === "video" ? 10 * 1024 * 1024 : 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+        const errorMsg = type === "video" 
+            ? translations[currentLang].toast_error_video_size
+            : translations[currentLang].toast_error_image_size;
+        showToast(errorMsg, "error");
+        event.target.value = ""; 
+        return;
+    }
+    
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var key = "product" + (type === "image" ? "Image" : "Video");
+        document.getElementById(key).value = e.target.result;
+        updateFileBtnState(type, true);
+        
+        const successMsg = type === "video" 
+            ? translations[currentLang].toast_success_video_loaded
+            : translations[currentLang].toast_success_image_loaded;
+        showToast(successMsg, "success");
+    };
+    
+    reader.onerror = function() { 
+        showToast(translations[currentLang].toast_error_file_read, "error"); 
+    };
+    reader.readAsDataURL(file);
+}
+
+// 更新文件按钮状态
+function updateFileBtnState(type, hasFile) {
+    var btn = document.getElementById(type + "FileBtn");
+    var clearBtn = document.getElementById(type + "ClearBtn");
+    
+    if (hasFile) {
+        btn.classList.add("has-file");
+        btn.innerHTML = "✅ " + (type === "video" 
+            ? (currentLang === "zh" ? "已选择视频" : "Video selected") 
+            : (currentLang === "zh" ? "已选择图片" : "Image selected"));
+        clearBtn.classList.add("show");
+    } else {
+        btn.classList.remove("has-file");
+        btn.innerHTML = translations[currentLang].btn_upload + "<input type='file' id='" + type + "FileInput' accept='" + (type === "image" ? "image/*" : "video/*") + "'>";
+        clearBtn.classList.remove("show");
+    }
+}
+
+// 清除媒体文件
+function clearMediaFile(type) {
+    var key = "product" + (type === "image" ? "Image" : "Video");
+    document.getElementById(key).value = "";
+    document.getElementById(type + "FileInput").value = "";
+    updateFileBtnState(type, false);
+}
+
+// 加载产品
+function loadProducts() {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) { 
+        try { 
+            products = JSON.parse(saved); 
+        } catch(e) { 
+            products = getDefaultProducts(); 
+        } 
+    } else { 
+        products = getDefaultProducts(); 
+    }
+    products.forEach(function(p) { 
+        if (p.video === undefined) p.video = ""; 
+    });
+    saveProducts();
+}
+
+// 获取默认产品
+function getDefaultProducts() {
+    return [
+        { 
+            name: currentLang === "en" ? "Smart Device A1" : "智能设备 A1", 
+            desc: currentLang === "en" ? "High performance, stable and reliable, suitable for various scenarios." : "高性能、稳定可靠，适用于各类场景。", 
+            image: "", 
+            video: "" 
+        },
+        { 
+            name: currentLang === "en" ? "Smart Home Kit" : "智能家居套装", 
+            desc: currentLang === "en" ? "Control all home devices with one click, safe and convenient." : "一键控制全屋设备，安全便捷。", 
+            image: "", 
+            video: "" 
+        },
+        { 
+            name: currentLang === "en" ? "Portable Recorder" : "便携式记录仪", 
+            desc: currentLang === "en" ? "Compact and lightweight, high-definition recording, long battery life." : "小巧轻便，高清录制，超长续航。", 
+            image: "", 
+            video: "" 
+        }
+    ];
+}
+
+// 保存产品
+function saveProducts() { 
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products)); 
+}
+
+// 渲染产品列表
+function renderProducts() {
+    var list = document.getElementById("productList");
+    if (products.length === 0) {
+        list.innerHTML = translations[currentLang].product_empty; 
+        return;
+    }
+    
+    list.innerHTML = products.map(function(p, i) {
+        var mediaHtml;
+        if (p.video) {
+            mediaHtml = '<video src="' + p.video + '" muted autoplay loop playsinline poster="' + (p.image || "") + '"></video><div class="video-play-badge">' + translations[currentLang].video_badge + '</div>';
+        } else if (p.image) {
+            var img = document.createElement("div");
+            img.textContent = p.image;
+            var escapedSrc = img.innerHTML;
+            mediaHtml = '<img src="' + escapedSrc + '" alt="' + escapeHtml(p.name) + '" onerror=\'this.outerHTML="<div class=\\"placeholder-icon\\">📷</div>"\'>';
+        } else {
+            mediaHtml = '<div class="placeholder-icon">📷</div>';
+        }
+        
+        var actionsHtml = isAdmin
+            ? '<div class="product-actions show"><button class="btn-edit" onclick="editProduct(' + i + ')" title="' + (currentLang === "en" ? "Edit" : "编辑") + '">✏️</button><button class="btn-delete" onclick="deleteProduct(' + i + ')" title="' + (currentLang === "en" ? "Delete" : "删除") + '">🗑️</button></div>'
+            : "";
+            
+        return '<div class="product-card"><div class="product-img">' + mediaHtml + '</div><div class="product-info"><div class="product-name">' + escapeHtml(p.name) + '</div><div class="product-desc">' + escapeHtml(p.desc) + '</div></div>' + actionsHtml + '</div>';
+    }).join("");
+}
+
+// 更新横幅产品数量
+function updateBannerCount() { 
+    document.getElementById("productCountBanner").textContent = products.length; 
+}
+
+// HTML转义
+function escapeHtml(text) { 
+    var d = document.createElement("div"); 
+    d.textContent = text; 
+    return d.innerHTML; 
+}
+
+// 切换管理员登录
+function toggleAdminLogin() {
+    if (isAdmin) { 
+        logoutAdmin(); 
+        return; 
+    }
+    document.getElementById("adminModal").classList.add("show");
+    document.getElementById("adminPassword").value = "";
+    document.getElementById("loginError").style.display = "none";
+    setTimeout(function() { 
+        document.getElementById("adminPassword").focus(); 
+    }, 100);
+}
+
+// 验证管理员
+function verifyAdmin() {
+    if (document.getElementById("adminPassword").value === ADMIN_PASSWORD) {
+        isAdmin = true; 
+        closeAdminModal();
+        document.getElementById("adminPanel").classList.add("show");
+        document.getElementById("btnAdminToggle").classList.add("active");
+        document.getElementById("btnAdminToggle").textContent = currentLang === "en" ? "🔓 Exit Admin" : "🔓 退出管理";
+        renderProducts(); 
+        showToast(translations[currentLang].toast_login_success, "success");
+    } else {
+        document.getElementById("loginError").style.display = "block";
+        document.getElementById("adminPassword").value = "";
+        document.getElementById("adminPassword").focus();
+    }
+}
+
+// 关闭管理员模态框
+function closeAdminModal() { 
+    document.getElementById("adminModal").classList.remove("show"); 
+}
+
+// 退出管理员
+function logoutAdmin() {
+    isAdmin = false;
+    document.getElementById("adminPanel").classList.remove("show");
+    document.getElementById("btnAdminToggle").classList.remove("active");
+    document.getElementById("btnAdminToggle").textContent = translations[currentLang].btn_admin;
+    cancelEdit(); 
+    renderProducts(); 
+    showToast(translations[currentLang].toast_logout_success, "success");
+}
+
+// 保存产品
+function saveProduct(e) {
+    e.preventDefault();
+    var name = document.getElementById("productName").value.trim();
+    var desc = document.getElementById("productDesc").value.trim();
+    var image = document.getElementById("productImage").value.trim();
+    var video = document.getElementById("productVideo").value.trim();
+    var idx = parseInt(document.getElementById("editIndex").value);
+    
+    if (!name || !desc) { 
+        showToast(translations[currentLang].toast_error_empty, "error"); 
+        return; 
+    }
+    
+    if (idx >= 0) { 
+        products[idx] = { name: name, desc: desc, image: image, video: video }; 
+        showToast(translations[currentLang].toast_update_success, "success"); 
+    } else { 
+        products.push({ name: name, desc: desc, image: image, video: video }); 
+        showToast(translations[currentLang].toast_add_success, "success"); 
+    }
+    
+    saveProducts(); 
+    renderProducts(); 
+    updateBannerCount(); 
+    resetForm();
+}
+
+// 编辑产品
+function editProduct(idx) {
+    var p = products[idx];
+    document.getElementById("productName").value = p.name;
+    document.getElementById("productDesc").value = p.desc;
+    document.getElementById("productImage").value = p.image || "";
+    document.getElementById("productVideo").value = p.video || "";
+    
+    updateFileBtnState("image", !!p.image);
+    updateFileBtnState("video", !!p.video);
+    
+    document.getElementById("editIndex").value = idx;
+    document.getElementById("submitBtn").textContent = translations[currentLang].btn_save_edit;
+    document.getElementById("cancelBtn").style.display = "block";
+    
+    document.getElementById("adminPanel").scrollIntoView({ behavior: "smooth" });
+    document.getElementById("productName").focus();
+}
+
+// 取消编辑
+function cancelEdit() { 
+    resetForm(); 
+}
+
+// 重置表单
+function resetForm() {
+    document.getElementById("productForm").reset();
+    document.getElementById("editIndex").value = "-1";
+    document.getElementById("submitBtn").textContent = translations[currentLang].btn_add_product;
+    document.getElementById("cancelBtn").style.display = "none";
+    updateFileBtnState("image", false);
+    updateFileBtnState("video", false);
+}
+
+// 删除产品
+function deleteProduct(idx) {
+    const confirmMsg = translations[currentLang].confirm_delete.replace("{name}", products[idx].name);
+    if (!confirm(confirmMsg)) return;
+    
+    products.splice(idx, 1);
+    saveProducts(); 
+    renderProducts(); 
+    updateBannerCount();
+    showToast(translations[currentLang].toast_delete_success, "success");
+    
+    if (parseInt(document.getElementById("editIndex").value) === idx) resetForm();
+}
+
+// 显示提示框
+function showToast(msg, type) {
+    var t = document.getElementById("toast");
+    t.textContent = msg; 
+    t.className = "toast " + type + " show";
+    
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() { 
+        t.classList.remove("show"); 
+    }, 2800);
+}
+
+// 设置导航滚动
+function setupNavScroll() {
+    var links = document.querySelectorAll(".nav-links a");
+    var secs = document.querySelectorAll("section[id]");
+    
+    window.addEventListener("scroll", function() {
+        var cur = "";
+        secs.forEach(function(s) { 
+            if (window.scrollY >= s.offsetTop - 120) cur = s.id; 
+        });
+        
+        links.forEach(function(a) { 
+            a.classList.toggle("active", a.getAttribute("href") === "#" + cur); 
+        });
+    });
+}
+
+// 初始化调用
+init();
+</script>
+</body>
+</html>
